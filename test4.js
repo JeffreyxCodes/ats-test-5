@@ -6,7 +6,23 @@ const Immutable = require('immutable');
 // similarly, there are 2 elements with 'legs' == 4 (cat and dog), 1 with 'legs' == 2 (bird) and 1 with 'legs' == 0 (snake). 
 // so we want legs: { 0: 1, 2: 1, 4: 2}
 const transform = (fromShape) => {
-  return fromShape;
+  const animals = fromShape.keySeq();
+  const traits = fromShape.get(animals.get('0')).keySeq();
+
+  return Immutable.Map().withMutations(mutable => {
+    animals.forEach((animal) => {
+      traits.forEach(trait => {
+        if (!mutable.has(trait)) {
+          mutable.set(trait, Immutable.Map());
+        }
+        const value = fromShape.getIn([animal, trait]);
+        mutable.setIn(
+          [trait, value],
+          (mutable.getIn([trait, value]) || 0) + 1
+        );
+      });
+    });
+  });
 };
 
 const fromShape = Immutable.fromJS({
