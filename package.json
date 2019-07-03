@@ -1,0 +1,23 @@
+{
+  "name": "test-5",
+  "version": "1.0.0",
+  "description": "test-5 - transforms and functional programming",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allied-technical-sales/test-5.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/allied-technical-sales/test-5/issues"
+  },
+  "homepage": "https://github.com/allied-technical-sales/test-5#readme",
+  "devDependencies": {
+    "immutable": "^3.8.2"
+  }
+}
