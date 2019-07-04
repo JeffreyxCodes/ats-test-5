@@ -38,7 +38,78 @@ const Immutable = require('immutable');
 // ]
 
 const transform = (fromShape) => {
-  return fromShape;
+  const itemKeys = fromShape.keySeq();
+
+  // constructes the data needed;
+  // Map of key value pair, where key is the all the unique attributeNames
+  // and value is the List of attributeValues associated with it
+  const attributes = Immutable.Map().withMutations(mutable => {
+    itemKeys.forEach(itemKey => {
+      fromShape.getIn([itemKey, 'attributes']).forEach(attribute => {
+        const attributeName = attribute.get('name');
+        const attributeValue = attribute.get('value');
+  
+        if (!mutable.has(attributeName)) {
+          mutable.set(
+            attributeName,
+            Immutable.List()
+          );
+        }
+
+        if (!mutable.get(attributeName).includes(attributeValue)) {
+          mutable.setIn(
+            [attributeName, mutable.get(attributeName).size],
+            attributeValue
+          );
+        }
+      });
+    });
+  });
+
+  return Immutable.List().withMutations(mutation => {
+    attributes.keySeq().forEach((attributeName, nameIndex) => {
+      mutation.set(nameIndex, Immutable.Map());
+      mutation.setIn(
+        [nameIndex, 'name'],
+        attributeName
+      ).setIn(
+        [nameIndex, 'values'],
+        Immutable.List()
+      );
+
+      attributes.get(attributeName).forEach((attributeValue, valueIndex) => {
+        mutation.setIn(
+          [nameIndex, 'values', valueIndex],
+          Immutable.Map()
+        ).setIn(
+          [nameIndex, 'values', valueIndex, 'value'],
+          attributeValue
+        ).setIn(
+          [nameIndex, 'values', valueIndex, 'items'],
+          Immutable.List()
+        );
+
+        itemKeys.forEach((key) => {
+          const has = fromShape.getIn([key, 'attributes']).some(attribute => {
+            return attribute.get('name') === attributeName && attribute.get('value') === attributeValue;
+          });
+
+          if (has) {
+            mutation.setIn(
+              [nameIndex, 'values', valueIndex, 'items', mutation.getIn([nameIndex, 'values', valueIndex, 'items']).size],
+              Immutable.Map()
+            ).setIn(
+              [nameIndex, 'values', valueIndex, 'items', mutation.getIn([nameIndex, 'values', valueIndex, 'items']).size - 1, 'name'],
+              fromShape.getIn([key, 'name'])
+            ).setIn(
+              [nameIndex, 'values', valueIndex, 'items', mutation.getIn([nameIndex, 'values', valueIndex, 'items']).size - 1, 'value'],
+              key
+            );
+          }
+        });
+      });
+    });
+  });
 };
 
 const fromShape = Immutable.fromJS({
