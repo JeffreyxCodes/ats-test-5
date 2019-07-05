@@ -2,7 +2,14 @@ const Immutable = require('immutable');
 
 // transform into object where the k is the letter of the alphabet, and the value is the number of time it occurs. 
 const transform = (fromShape) => {
-  return fromShape;
+  return Immutable.Map().withMutations(mutable => {
+    fromShape.forEach(char => {
+      mutable.set(
+        char,
+        (mutable.get(char) || 0) + 1
+      );
+    });
+  });
 };
 
 const fromShape = Immutable.fromJS([
